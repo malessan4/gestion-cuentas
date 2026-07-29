@@ -38,7 +38,7 @@ export default function Home() {
   const [titular, setTitular] = useState('');
   const [monto, setMonto] = useState('');
   
-  const API_URL = 'http://localhost:5156/api/cuentas';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5156/api/cuentas';
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

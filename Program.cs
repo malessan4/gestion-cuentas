@@ -15,12 +15,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register the application services
 builder.Services.AddScoped<ICuentasService, CuentasService>();
 
-// Configurar CORS
+// Configurar CORS para producción
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // URL del frontend Next.js
+        policy.AllowAnyOrigin() // Permitir Vercel (cualquier origen)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -33,15 +33,13 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Exponemos la interfaz gráfica de la API (Scalar) en cualquier entorno (incluyendo Producción) 
+// para que los reclutadores puedan verla en Render.
+app.MapOpenApi();
+app.MapScalarApiReference(options => 
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options => 
-    {
-        options.WithTitle("MiniCoreBancario API");
-    });
-}
+    options.WithTitle("MiniCoreBancario API");
+});
 
 app.UseHttpsRedirection();
 
