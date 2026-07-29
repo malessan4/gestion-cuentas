@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MiniCoreBancario.Data;
 using MiniCoreBancario.Services;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options => 
+    {
+        options.WithTitle("MiniCoreBancario API");
+    });
 }
 
 app.UseHttpsRedirection();
