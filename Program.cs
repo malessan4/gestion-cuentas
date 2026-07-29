@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MiniCoreBancario.Data;
+using MiniCoreBancario.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 // Configure Entity Framework Core with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register the application services
+builder.Services.AddScoped<ICuentasService, CuentasService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

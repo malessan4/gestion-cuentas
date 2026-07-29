@@ -1,7 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MiniCoreBancario.Data;
-using MiniCoreBancario.Models;
+using MiniCoreBancario.DTOs;
+using MiniCoreBancario.Services;
 
 namespace MiniCoreBancario.Controllers
 {
@@ -9,26 +11,26 @@ namespace MiniCoreBancario.Controllers
     [ApiController]
     public class CuentasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICuentasService _cuentasService;
 
-        public CuentasController(AppDbContext context)
+        public CuentasController(ICuentasService cuentasService)
         {
-            _context = context;
+            _cuentasService = cuentasService;
         }
 
         // GET: api/cuentas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cuenta>>> GetCuentas()
+        public async Task<ActionResult<IEnumerable<CuentaDto>>> GetCuentas()
         {
-            return await _context.Cuentas.ToListAsync();
+            var cuentas = await _cuentasService.GetCuentasAsync();
+            return Ok(cuentas);
         }
 
         // POST: api/cuentas
         [HttpPost]
-        public async Task<ActionResult<Cuenta>> CrearCuenta(Cuenta cuenta)
+        public async Task<ActionResult<CuentaDto>> CrearCuenta([FromBody] CrearCuentaDto dto)
         {
-            _context.Cuentas.Add(cuenta);
-            await _context.SaveChangesAsync();
+            var cuenta = await _cuentasService.CrearCuentaAsync(dto);
             return CreatedAtAction(nameof(GetCuentas), new { id = cuenta.Id }, cuenta);
         }
 
@@ -36,52 +38,42 @@ namespace MiniCoreBancario.Controllers
         [HttpPost("{id}/deposito")]
         public async Task<IActionResult> Deposito(int id, [FromBody] decimal monto)
         {
-            if (monto <= 0) return BadRequest("El monto debe ser mayor a cero.");
-
-            var cuenta = await _context.Cuentas.FindAsync(id);
-            if (cuenta == null) return NotFound("Cuenta no encontrada.");
-
-            cuenta.Saldo += monto;
-            
-            var transaccion = new Transaccion
+            try
             {
-                CuentaId = id,
-                Monto = monto,
-                Tipo = "Depósito",
-                Fecha = DateTime.UtcNow
-            };
-
-            _context.Transacciones.Add(transaccion);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Mensaje = "Depósito exitoso", SaldoActual = cuenta.Saldo });
+                var transaccion = await _cuentasService.DepositoAsync(id, monto);
+                return Ok(new { Mensaje = "Depósito exitoso", Transaccion = transaccion });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // POST: api/cuentas/{id}/retiro
         [HttpPost("{id}/retiro")]
         public async Task<IActionResult> Retiro(int id, [FromBody] decimal monto)
         {
-            if (monto <= 0) return BadRequest("El monto debe ser mayor a cero.");
-
-            var cuenta = await _context.Cuentas.FindAsync(id);
-            if (cuenta == null) return NotFound("Cuenta no encontrada.");
-
-            if (cuenta.Saldo < monto) return BadRequest("Saldo insuficiente.");
-
-            cuenta.Saldo -= monto;
-
-            var transaccion = new Transaccion
+            try
             {
-                CuentaId = id,
-                Monto = monto,
-                Tipo = "Retiro",
-                Fecha = DateTime.UtcNow
-            };
-
-            _context.Transacciones.Add(transaccion);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Mensaje = "Retiro exitoso", SaldoActual = cuenta.Saldo });
+                var transaccion = await _cuentasService.RetiroAsync(id, monto);
+                return Ok(new { Mensaje = "Retiro exitoso", Transaccion = transaccion });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
