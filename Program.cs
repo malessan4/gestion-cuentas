@@ -31,6 +31,13 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Auto-crear la base de datos si no existe (vital para Docker / Render)
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated();
+}
+
 app.UseCors("AllowFrontend");
 
 // Exponemos la interfaz gráfica de la API (Scalar) en cualquier entorno (incluyendo Producción) 
