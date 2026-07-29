@@ -1,0 +1,20 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#0f172a"/>
+  
+  <!-- Techo del banco -->
+  <path d="M128 50L60 90v15h136V90L128 50z" fill="url(#grad)"/>
+  
+  <!-- Columnas -->
+  <rect x="70" y="120" width="20" height="60" fill="url(#grad)"/>
+  <rect x="118" y="120" width="20" height="60" fill="url(#grad)"/>
+  <rect x="166" y="120" width="20" height="60" fill="url(#grad)"/>
+  
+  <!-- Base -->
+  <path d="M50 195h156v15H50z" fill="url(#grad)"/>
+</svg>
