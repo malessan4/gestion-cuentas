@@ -24,5 +24,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
+# Render's free tier has a known issue with inotify file watcher limits.
+# This environment variable tells .NET not to watch for file changes in appsettings.json.
+ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
+
 # The sqlite database will be created in the /app directory when EF Core runs or when the app is started.
 ENTRYPOINT ["dotnet", "MiniCoreBancario.dll"]
